@@ -10,7 +10,8 @@ from random import randint
 myconnection = utilities.create_connection("db/neodatabase")
 
 # Updater
-updater = Updater(token='1932470254:AAF2Xtxpgu0k_NkIAcIOkuVVsTT3i5Nb744', use_context=True)
+# Put the token here.
+updater = Updater(token= #token, use_context=True)
 dispatcher = updater.dispatcher
 
 # Logging module, to catch errors
