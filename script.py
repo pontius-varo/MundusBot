@@ -1,5 +1,5 @@
 # MundusBot script #
-
+version = 1.1 #MELTY
 # Imports
 import utilities, logging, templates
 from telegram.ext import CommandHandler, Updater
@@ -11,7 +11,9 @@ myconnection = utilities.create_connection("db/neodatabase")
 
 # Updater
 # Put the token here.
-updater = Updater(token= #token, use_context=True)
+token = 'dummy'
+use_context = True
+updater = Updater(token, use_context)
 dispatcher = updater.dispatcher
 
 # Logging module, to catch errors
@@ -131,6 +133,74 @@ def gethelp(update, context):
     except:
         print('Error')
 
+# Sam Saying Yes #
+def samsayingyes(update, context):
+    sticker = 'CAACAgEAAxkBAAEDMilhftTjxn88VqCiCqYhGh0XxD8T9AACIAIAAjzdyEe2g_Klt73eNCEE'
+    chat_id = update.effective_chat.id
+    context.bot.send_sticker(chat_id, sticker)
+
+# Thanks #
+def greeting(update, context):
+    print(len(templates.responses) - 1)
+    key = randint(0, len(templates.responses) - 1)
+    print(key)
+    update.message.reply_text(text=templates.responses[key])
+
+# Cells #
+def showcells(update, context):
+    usernum = context.args[0]
+
+    try:
+        int(usernum)
+    except:
+        update.message.reply_text(text='That isn\'t an interger m8')
+        return
+
+    if(int(usernum) > 30):
+        update.message.reply_text(text='Too long! Use an interger under 30 please.')
+        return
+
+    num = 0
+    msg = ''
+    while num < int(usernum):
+        msg += ('\n%s' % (templates.text[0]))
+        num += 1
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
+# ===== Admin Commands ===== #
+
+def displayallusers(update, context):
+    username = ('@%s' % (update.message.from_user.username))
+    admin = False
+
+    for x in range(len(templates.admins) - 1):
+
+        if (username == templates.admins[x]):
+            admin = True
+        else:
+            print('Nope')
+
+    if(admin == True):
+        try:
+            data_1 = utilities.execute_read_query(myconnection, (templates.queries['ALLUSERS']))
+            data_2 = utilities.execute_read_query(myconnection, (templates.queries['ALLSTATUS']))
+
+            users = utilities.cleanarray(data_1)
+            userstatus = utilities.cleanarray(data_2)
+
+            msg = ('Current Number of Users in My DB: %s\nUsers with Status:' % (len(users)))
+
+            for x in range(len(users)):
+                msg += ('\n%s | %s' % (users[x], userstatus[x]))
+
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
+        except:
+            print('ERROR| PLEASE DEBUG')
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text=('You\'re not an admin, GTFO n00b'))
+
+# ===== Handlers ===== #
+
 # Start Handler
 start_handler = CommandHandler('start', start)
 dispatcher.add_handler(start_handler)
@@ -155,6 +225,22 @@ dispatcher.add_handler(get_handler)
 # Help Handler
 help_handler = CommandHandler('help', gethelp)
 dispatcher.add_handler(help_handler)
+
+#Display All Users Handler #
+dau_handler = CommandHandler('displayallusers', displayallusers)
+dispatcher.add_handler(dau_handler)
+
+# Sam Saying Yes [CUSTOM]#
+sam_yes = CommandHandler('samsayingyes', samsayingyes)
+dispatcher.add_handler(sam_yes)
+
+# Cells #
+cells = CommandHandler('cells', showcells, pass_args=True)
+dispatcher.add_handler(cells)
+
+# Greeting #
+mund_greeting = CommandHandler('thanks', greeting)
+dispatcher.add_handler(mund_greeting)
 
 # End of Line
 updater.start_polling()

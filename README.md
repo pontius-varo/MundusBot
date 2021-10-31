@@ -1,6 +1,6 @@
 # MundusBot
 
-Version: 1.0 "Melty"
+Version: 1.1 "MELTY"
 
 A telegram bot written in Python 3.9 for a private server.
 

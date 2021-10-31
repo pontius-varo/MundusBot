@@ -44,3 +44,8 @@ def tostring(array):
 
 def cleanstring(string):
         return string.replace(",","").replace("(","").replace(")","").replace("\'", "").replace("[","").replace("]","")
+
+def cleanarray(array):
+    for x in range(len(array)):
+        array[x] = cleanstring(str(array[x]))
+    return array
