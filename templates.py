@@ -1,4 +1,4 @@
-responses = {'FORIEGNER': '%s\nStanding with Mundus: Foriegner\nStep it up m8 and start eating, lifting, and programming!',
+user_res = {'FORIEGNER': '%s\nStanding with Mundus: Foriegner\nStep it up m8 and start eating, lifting, and programming!',
             'PLEB' : '%s\nStanding with Mundus: Pleb\nGithub: %s\nWhat a pleb, get gud m8.',
             'EQUESTRIAN' : '%s\nStanding with Mundus: Equestrian\nGithub: %s\nLinkedIn: %s\nSeems like you\'re getting there, keep it up!',
             'PATRICIAN' : '%s\nStanding with Mundus: Patrician\nGithub: %s\nLinkedIn: %s\nWebsite: %s\nA true Patrician, 1337 in every way.',
@@ -17,9 +17,10 @@ catagories = ['github', 'linkedin', 'website']
 
 catagory_pairs = {'github':'Url1', 'linkedin':'Url2', 'website':'Url3'}
 
-help_txt = ['Current commands: /start, /getuser @username, /adduser, /updateurl [type: github, linkedin, website], /updatestatus, /getstatus @username']
+help_txt = ['Current commands: /start, /getuser @username, /adduser, /updateurl [type: github, linkedin, website], /updatestatus, /getstatus @username\n
+/samsayingyes, /cells [int], /thanks']
 
-admins = ['@eatliftprogram', '@aurelianus_varo', '@chilledplash', '@MichaelZalla', '@fido_CXI']
+admins = ['@admin']
 
 responses = ['You\'re welcome m8', 'No, thank you my fellow basketballian', 'Welcome', 'g8 r3ply m8 ur w31cum']
 

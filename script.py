@@ -1,5 +1,5 @@
 # MundusBot script #
-version = 1.1 #MELTY
+version = 1.2 #MELTY
 # Imports
 import utilities, logging, templates
 from telegram.ext import CommandHandler, Updater
@@ -11,9 +11,8 @@ myconnection = utilities.create_connection("db/neodatabase")
 
 # Updater
 # Put the token here.
-token = 'dummy'
-use_context = True
-updater = Updater(token, use_context)
+token='dummy'
+updater = Updater(token, use_context=True)
 dispatcher = updater.dispatcher
 
 # Logging module, to catch errors
@@ -41,15 +40,15 @@ def getuser(update, context):
                 pass
 
         if(username[0] == "@eatliftprogram"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.responses['SPECIAL'] % (username[0], userdata[0], userdata[1], userdata[2])))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL'] % (username[0], userdata[0], userdata[1], userdata[2])))
         elif(username[0] == "@pavlogetsit"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.responses['SPECIAL2'] % (username[0], userdata[0], userdata[1], userdata[2])))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL2'] % (username[0], userdata[0], userdata[1], userdata[2])))
 
         elif(username[0] == "@aurelianus_varo"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.responses['SPECIAL3'] % (username[0], userdata[0], userdata[1], userdata[2])))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL3'] % (username[0], userdata[0], userdata[1], userdata[2])))
 
         elif(count > 2):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.responses['FORIEGNER'] % (username[0])))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['FORIEGNER'] % (username[0])))
 
         elif(count == 2):
             msg = (templates.responses['PLEB'] % (username[0], userdata[0]))
@@ -103,7 +102,10 @@ def addinfo(update, context):
 # Update Status [Adds a string to the 'status' column in the main table]
 def updatestatus(update, context):
     username = ('@%s' % (update.message.from_user.username))
-    content = context.args[0]
+    content = ' '.join(context.args)
+
+    #for x in range(len(context.args)):
+        #content += context.args[x]
 
     if(utilities.cleanstring(str((utilities.execute_read_query(myconnection, (templates.queries['DOESUSEREXIST'] % (username)))))) == username):
         try:
@@ -141,9 +143,7 @@ def samsayingyes(update, context):
 
 # Thanks #
 def greeting(update, context):
-    print(len(templates.responses) - 1)
     key = randint(0, len(templates.responses) - 1)
-    print(key)
     update.message.reply_text(text=templates.responses[key])
 
 # Cells #
@@ -173,7 +173,7 @@ def displayallusers(update, context):
     username = ('@%s' % (update.message.from_user.username))
     admin = False
 
-    for x in range(len(templates.admins) - 1):
+    for x in range(len(templates.admins)):
 
         if (username == templates.admins[x]):
             admin = True
