@@ -1,5 +1,5 @@
 # MundusBot script #
-version = 1.2 #MELTY
+version = 1.4 #MELTY
 # Imports
 import utilities, logging, templates
 from telegram.ext import CommandHandler, Updater
@@ -23,15 +23,20 @@ def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="I am online!")
 
 def getuser(update, context):
-    username = context.args
+    
+    if context.args == []:
+        username = ('@%s' % (update.message.from_user.username))
+    
+    else:
+        username = context.args[0]
+
     try:
-        tempdata = utilities.cleanstring(str(utilities.execute_read_query(myconnection, ("select Url1, Url2, Url3 from Userlib where Username = \'%s\';" % username[0]))))
-        # This should return a clean array!
-        userdata = tempdata.split(" ")
+        data_1 = utilities.execute_read_query(myconnection, (templates.queries['GETUSER'] % username))
+
+        userdata = utilities.cleanarray(data_1)
 
         count = 0
 
-        # Check the amount of Nones!
         for x in userdata:
 
             if(x == "None"):
@@ -39,27 +44,27 @@ def getuser(update, context):
             else:
                 pass
 
-        if(username[0] == "@eatliftprogram"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL'] % (username[0], userdata[0], userdata[1], userdata[2])))
-        elif(username[0] == "@pavlogetsit"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL2'] % (username[0], userdata[0], userdata[1], userdata[2])))
+        if(username == "@eatliftprogram"):
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL'] % (username, userdata[0], userdata[1], userdata[2])))
+        elif(username == "@pavlogetsit"):
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL2'] % (username, userdata[0], userdata[1], userdata[2])))
 
-        elif(username[0] == "@aurelianus_varo"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL3'] % (username[0], userdata[0], userdata[1], userdata[2])))
+        elif(username == "@aurelianus_varo"):
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL3'] % (username, userdata[0], userdata[1], userdata[2])))
 
         elif(count > 2):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['FORIEGNER'] % (username[0])))
+            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['FORIEGNER'] % (username)))
 
         elif(count == 2):
-            msg = (templates.responses['PLEB'] % (username[0], userdata[0]))
+            msg = (templates.responses['PLEB'] % (username, userdata[0]))
             context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
 
         elif(count == 1):
-            msg = (templates.reponses['EQUESTRIAN'] % (username[0], userdata[0], userdata[1]))
+            msg = (templates.reponses['EQUESTRIAN'] % (username, userdata[0], userdata[1]))
             context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
 
         else:
-            msg = (templates.responses['PATRICIAN'] % (username[0], userdata[0], userdata[1], userdata[2]))
+            msg = (templates.responses['PATRICIAN'] % (username, userdata[0], userdata[1], userdata[2]))
             context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
 
     except:
@@ -67,12 +72,11 @@ def getuser(update, context):
 
 # Add user to db and returns whether or not it was successful
 def adduser(update, context):
-    #username = context.args
-    #usr = username[0]
     usr = ('@%s' % (update.message.from_user.username))
+    
     if(str(utilities.execute_read_query(myconnection, (templates.queries['DOESUSEREXIST'] % (usr)))) == "[]"):
-        # Hardcoded I know, but it works
         userint = randint(1, 10000)
+        
         try:
              utilities.execute_query(myconnection, (templates.queries['NEWUSER'] % (str(userint), usr)))
              context.bot.send_message(chat_id=update.effective_chat.id, text=("%s added successfully to the database." % usr))
@@ -118,7 +122,12 @@ def updatestatus(update, context):
 
 # Get User Status from Database
 def getstatus(update, context):
-    username = context.args[0]
+    
+    if context.args == []:
+        username = ('@%s' % (update.message.from_user.username))
+    else:
+        username = context.args[0]
+
     if(utilities.cleanstring(str((utilities.execute_read_query(myconnection, (templates.queries['DOESUSEREXIST'] % (username)))))) == username):
         try:
             status = utilities.cleanstring(str(utilities.execute_read_query(myconnection, (templates.queries['GETSTATUS'] % (username)))))
@@ -204,18 +213,21 @@ def displayallusers(update, context):
 # Start Handler
 start_handler = CommandHandler('start', start)
 dispatcher.add_handler(start_handler)
+
 # Get_User Handler
 get_userhandler = CommandHandler('getuser', getuser, pass_args=True)
 dispatcher.add_handler(get_userhandler)
+
 # Add User Handler
 adduser_handler = CommandHandler('adduser', adduser, pass_args=True)
 dispatcher.add_handler(adduser_handler)
+
 # Add Info Handler
 addinfo_handler = CommandHandler('updateurl', addinfo, pass_args=True)
 dispatcher.add_handler(addinfo_handler)
 
-#  Update Status Handler
-update_handler = CommandHandler('updatestatus', updatestatus)
+#  Set Status Handler
+update_handler = CommandHandler('setstatus', updatestatus)
 dispatcher.add_handler(update_handler)
 
 # Get Status Handler

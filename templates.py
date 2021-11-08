@@ -11,7 +11,7 @@ user_res = {'FORIEGNER': '%s\nStanding with Mundus: Foriegner\nStep it up m8 and
 queries = {"NEWUSER" : "INSERT INTO Userlib VALUES (%s, \'%s\', 'None', 'None', 'None', 'No Status');",
         'DOESUSEREXIST' : 'select Username from Userlib where Username = \'%s\';', 'ADDURL': 'update Userlib set %s = \'%s\' where Username =\'%s\';',
         'ADDSTATUS':'update Userlib set Status=\'%s\' where Username=\'%s\';', 'GETSTATUS':'select Status from Userlib where Username=\'%s\';',
-        'ALLUSERS': 'select Username from Userlib;', 'ALLSTATUS':'select Status from Userlib;'}
+        'ALLUSERS': 'select Username from Userlib;', 'ALLSTATUS':'select Status from Userlib;', 'GETUSER' : 'select Url1, Url2, Url3 from Userlib where Username = \'%s\';'}
 
 catagories = ['github', 'linkedin', 'website']
 
