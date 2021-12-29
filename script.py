@@ -1,258 +1,155 @@
 # MundusBot script #
-version = 1.4 #MELTY
-# Imports
-import utilities, logging, templates
-from telegram.ext import CommandHandler, Updater
+from lib import utilities
+from lib import mundusfuncs
+# Always import custom just in case, even if file is empty
+from lib import custom
+from telegram.ext import CommandHandler, Updater, MessageHandler, Filters
+version = 1.6  # MELTY
 
-from random import randint
+# == Global Variables ==#
 
-# Establish connection to db
-myconnection = utilities.create_connection("db/neodatabase")
+# Connection to Database
+db = utilities.returnSetting('server_database')
+db_connection = utilities.create_connection(db)
 
-# Updater
-# Put the token here.
-token='dummy'
+# Telegram Chat Token #
+token = utilities.returnSetting('bot_token')
+# Updater Object #
 updater = Updater(token, use_context=True)
+# Dispatcher #
 dispatcher = updater.dispatcher
 
-# Logging module, to catch errors
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level = logging.INFO)
+# ===== Commands =====#
 
-# Start function that also processes updates
-def start(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="I am online!")
 
-def getuser(update, context):
-    
+def getUser(update, context):
     if context.args == []:
-        username = ('@%s' % (update.message.from_user.username))
-    
+        username = utilities.formatUserName(update)
+
     else:
         username = context.args[0]
 
-    try:
-        data_1 = utilities.execute_read_query(myconnection, (templates.queries['GETUSER'] % username))
+    telegram_msg = mundusfuncs.getUserInfo(username, db_connection)[0]
 
-        userdata = utilities.cleanarray(data_1)
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg))
 
-        count = 0
 
-        for x in userdata:
+def addUser(update, context):
+    username = utilities.formatUserName(update)
 
-            if(x == "None"):
-                count += 1
-            else:
-                pass
+    telegram_msg = mundusfuncs.addUsertoDb(username, db_connection)
 
-        if(username == "@eatliftprogram"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL'] % (username, userdata[0], userdata[1], userdata[2])))
-        elif(username == "@pavlogetsit"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL2'] % (username, userdata[0], userdata[1], userdata[2])))
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg)
+    )
 
-        elif(username == "@aurelianus_varo"):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['SPECIAL3'] % (username, userdata[0], userdata[1], userdata[2])))
 
-        elif(count > 2):
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.user_res['FORIEGNER'] % (username)))
+def addInfo(update, context):
+    username = utilities.formatUserName(update)
 
-        elif(count == 2):
-            msg = (templates.responses['PLEB'] % (username, userdata[0]))
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
+    telegram_msg = mundusfuncs.addData(username, context.args, db_connection)
 
-        elif(count == 1):
-            msg = (templates.reponses['EQUESTRIAN'] % (username, userdata[0], userdata[1]))
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg[0])
+    )
 
-        else:
-            msg = (templates.responses['PATRICIAN'] % (username, userdata[0], userdata[1], userdata[2]))
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
 
-    except:
-        context.bot.send_message(chat_id=update.effective_chat.id, text='Not Found. That user doesn\'t exist m8.')
+def updateStatus(update, context):
 
-# Add user to db and returns whether or not it was successful
-def adduser(update, context):
-    usr = ('@%s' % (update.message.from_user.username))
-    
-    if(str(utilities.execute_read_query(myconnection, (templates.queries['DOESUSEREXIST'] % (usr)))) == "[]"):
-        userint = randint(1, 10000)
-        
-        try:
-             utilities.execute_query(myconnection, (templates.queries['NEWUSER'] % (str(userint), usr)))
-             context.bot.send_message(chat_id=update.effective_chat.id, text=("%s added successfully to the database." % usr))
-        except:
-            context.bot.send_message(chat_id=update.effective_chat.id, text=f'Error')
-    else:
-       context.bot.send_message(chat_id=update.effective_chat.id, text=('That user already exists m8.'))
+    username = utilities.formatUserName(update)
 
-def addinfo(update, context):
-    username = ('@%s' % (update.message.from_user.username))
-    entry_type = context.args[0]
-    url = context.args[1]
+    telegram_msg = mundusfuncs.updateUserStatus(
+        username, context.args, db_connection)
 
-    if entry_type not in templates.catagories:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=('Invalid catagory m8.'))
-        return
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg[0])
+    )
 
-    if(utilities.cleanstring(str((utilities.execute_read_query(myconnection, (templates.queries['DOESUSEREXIST'] % (username)))))) == username):
-        try:
-            utilities.execute_query(myconnection, (templates.queries['ADDURL'] % (templates.catagory_pairs[entry_type], url, username)))
-            context.bot.send_message(chat_id=update.effective_chat.id, text=('Your %s url has been updated, %s' % (entry_type, username)))
-        except:
-            context.bot.send_message(chat_id=update.effective_chat.id, text='Error')
-    else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=('You\'re not in my datalibrary, GTFO.'))
 
-# Update Status [Adds a string to the 'status' column in the main table]
-def updatestatus(update, context):
-    username = ('@%s' % (update.message.from_user.username))
-    content = ' '.join(context.args)
+def getStatus(update, context):
 
-    #for x in range(len(context.args)):
-        #content += context.args[x]
-
-    if(utilities.cleanstring(str((utilities.execute_read_query(myconnection, (templates.queries['DOESUSEREXIST'] % (username)))))) == username):
-        try:
-            utilities.execute_query(myconnection, (templates.queries['ADDSTATUS'] % (content, username)))
-            context.bot.send_message(chat_id=update.effective_chat.id, text=('Your status has been set, %s' % (username)))
-        except:
-            context.bot.send_message(chat_id=update.effective_chat.id, text='Error')
-    else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=('You\'re not in my datalibrary, GTFO.'))
-
-# Get User Status from Database
-def getstatus(update, context):
-    
     if context.args == []:
-        username = ('@%s' % (update.message.from_user.username))
+        username = utilities.formatUserName(update)
     else:
         username = context.args[0]
 
-    if(utilities.cleanstring(str((utilities.execute_read_query(myconnection, (templates.queries['DOESUSEREXIST'] % (username)))))) == username):
-        try:
-            status = utilities.cleanstring(str(utilities.execute_read_query(myconnection, (templates.queries['GETSTATUS'] % (username)))))
-            context.bot.send_message(chat_id=update.effective_chat.id, text=('%s\'s current status: %s' % (username, status)))
-        except:
-            context.bot.send_message(chat_id=update.effective_chat.id, text='Error')
-    else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=('That user doesn\'t exist m8'))
+    telegram_msg = mundusfuncs.getUserStatus(username, db_connection)
+
+    context.bot.send_message(
+            chat_id=update.effective_chat.id, text=(telegram_msg[0])
+        )
 
 # Help
-def gethelp(update, context):
-    try:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=(templates.help_txt[0]))
-    except:
-        print('Error')
 
-# Sam Saying Yes #
-def samsayingyes(update, context):
-    sticker = 'CAACAgEAAxkBAAEDMilhftTjxn88VqCiCqYhGh0XxD8T9AACIAIAAjzdyEe2g_Klt73eNCEE'
-    chat_id = update.effective_chat.id
-    context.bot.send_sticker(chat_id, sticker)
 
-# Thanks #
-def greeting(update, context):
-    key = randint(0, len(templates.responses) - 1)
-    update.message.reply_text(text=templates.responses[key])
+def getHelp(update, context):
+    telegram_msg = mundusfuncs.fetchHelp()
 
-# Cells #
-def showcells(update, context):
-    usernum = context.args[0]
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg[0])
+    )
 
-    try:
-        int(usernum)
-    except:
-        update.message.reply_text(text='That isn\'t an interger m8')
-        return
+# Get Gas
 
-    if(int(usernum) > 30):
-        update.message.reply_text(text='Too long! Use an interger under 30 please.')
-        return
 
-    num = 0
-    msg = ''
-    while num < int(usernum):
-        msg += ('\n%s' % (templates.text[0]))
-        num += 1
+def getGas(update, context):
+    gas_result = mundusfuncs.returnGas()
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(gas_result[0]))
+
+
+# Unknown Command
+def unknownCmd(update, context):
+    response = 'Sorry, I didn\'t understand that command. Try /help to see a list of commands'
+
+    update.message.reply_text(text=response)
+
+
 # ===== Admin Commands ===== #
 
-def displayallusers(update, context):
-    username = ('@%s' % (update.message.from_user.username))
-    admin = False
 
-    for x in range(len(templates.admins)):
+def displayAllUsers(update, context):
 
-        if (username == templates.admins[x]):
-            admin = True
-        else:
-            print('Nope')
+    username = utilities.formatUserName(update)
 
-    if(admin == True):
-        try:
-            data_1 = utilities.execute_read_query(myconnection, (templates.queries['ALLUSERS']))
-            data_2 = utilities.execute_read_query(myconnection, (templates.queries['ALLSTATUS']))
+    list_of_users = mundusfuncs.displayAll(username, db_connection)
 
-            users = utilities.cleanarray(data_1)
-            userstatus = utilities.cleanarray(data_2)
-
-            msg = ('Current Number of Users in My DB: %s\nUsers with Status:' % (len(users)))
-
-            for x in range(len(users)):
-                msg += ('\n%s | %s' % (users[x], userstatus[x]))
-
-            context.bot.send_message(chat_id=update.effective_chat.id, text=(msg))
-        except:
-            print('ERROR| PLEASE DEBUG')
-    else:
-        context.bot.send_message(chat_id=update.effective_chat.id, text=('You\'re not an admin, GTFO n00b'))
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(list_of_users[0])
+    )
 
 # ===== Handlers ===== #
 
-# Start Handler
-start_handler = CommandHandler('start', start)
-dispatcher.add_handler(start_handler)
 
-# Get_User Handler
-get_userhandler = CommandHandler('getuser', getuser, pass_args=True)
-dispatcher.add_handler(get_userhandler)
+# Command Dictionary is always filled with default commands
+command_dict = {
+    'getuser': getUser,
+    'adduser': addUser,
+    'updateurl': addInfo,
+    'setstatus': updateStatus,
+    'getstatus': getStatus,
+    'displayallusers': displayAllUsers,
+    'help': getHelp,
+    'gas': getGas
+}
+# Pulls the custom functions written by the user in ./lib/custom.py
+if (utilities.returnSetting('custom_functions')):
+    for key in custom.custom_cmds:
+        command_dict[key] = custom.custom_cmds[key]
 
-# Add User Handler
-adduser_handler = CommandHandler('adduser', adduser, pass_args=True)
-dispatcher.add_handler(adduser_handler)
+# Dispatch all commands found in the dictionary
+for key in command_dict:
+    try:
+        print(f'Passing {key} to dispatcher')
+        cmd = CommandHandler(key, command_dict[key])
+        dispatcher.add_handler(cmd)
+    except Exception as e:
+        print(f'Something happened!{e}')
 
-# Add Info Handler
-addinfo_handler = CommandHandler('updateurl', addinfo, pass_args=True)
-dispatcher.add_handler(addinfo_handler)
-
-#  Set Status Handler
-update_handler = CommandHandler('setstatus', updatestatus)
-dispatcher.add_handler(update_handler)
-
-# Get Status Handler
-get_handler = CommandHandler('getstatus', getstatus)
-dispatcher.add_handler(get_handler)
-
-# Help Handler
-help_handler = CommandHandler('help', gethelp)
-dispatcher.add_handler(help_handler)
-
-#Display All Users Handler #
-dau_handler = CommandHandler('displayallusers', displayallusers)
-dispatcher.add_handler(dau_handler)
-
-# Sam Saying Yes [CUSTOM]#
-sam_yes = CommandHandler('samsayingyes', samsayingyes)
-dispatcher.add_handler(sam_yes)
-
-# Cells #
-cells = CommandHandler('cells', showcells, pass_args=True)
-dispatcher.add_handler(cells)
-
-# Greeting #
-mund_greeting = CommandHandler('thanks', greeting)
-dispatcher.add_handler(mund_greeting)
+# Dispatch misc cmd handler seperately
+dispatcher.add_handler(MessageHandler(Filters.command, unknownCmd))
 
 # End of Line
 updater.start_polling()

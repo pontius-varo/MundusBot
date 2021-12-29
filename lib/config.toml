@@ -1,0 +1,4 @@
+gas = 2650
+delay = 10
+key = "aaf75710176734fd70d3fced868874bb9b99f9d64db4d59c68c759774576"
+log = "/tmp/python-gas"

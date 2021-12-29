@@ -1,0 +1,15 @@
+{
+  "server_name": "Your Server",
+  "server_owner": "@Anon",
+  "server_database": "./db/yourdb",
+  "server_admins": [
+  "@AnonAnonson"
+  ],
+  "bot_token": "",
+  "server_wizards": [
+    "@RMS",
+    "@LordTerry",
+    "@Drich"
+  ],
+  "custom_functions": false
+}
