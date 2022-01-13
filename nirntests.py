@@ -76,18 +76,6 @@ class NirnTest(unittest.TestCase):
 
         self.assertFalse(result[1], result[0])
 
-    # Consider the following file structure
-    # main.py (compiles bot), commands.py (contains all functions),
-    # library.py (contains strings and arrays), utilities.py ->
-    # (contains auxiliary functions), gas.py (standalone for pygas),
-    # settings.json (user settings for bot), start.py ->
-    # allow first time user to add token and database values, while
-    # saving those values in the settings.json file for later use
-    # first time execution should be as follows:
-    # start.py -> (rewrites) settings.json, main.py -> (triggers nirntest.py)
-    # nirntest.py (if successful) -> (takes data from) settings.json ->
-    # main.py is compiled and the bot is run successfully
-
 
 if __name__ == '__main__':
     unittest.main()

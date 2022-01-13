@@ -1,3 +1,5 @@
+# All of these "Tiers" can be changed at your discretion.
+# Just make sure to edit the /getuser function and replace your key strings with my defaults
 user_res = {'FORIEGNER': '%s\nStanding with Mundus: Foreigner\nJust Eat Lift Program, bro',
             'PLEB': '%s\nStanding with Mundus: Pleb\nGithub: %s\Get Gud',
             'EQUESTRIAN': '%s\nStanding with Mundus: Equestrian\nGithub: %s\nLinkedIn: %s\nSeems like you\'re getting there, keep it up!',
@@ -15,12 +17,15 @@ queries = {"NEWUSER": "INSERT INTO Userlib VALUES (%s, \'%s\', 'None', 'None', '
            'GETSTATUS': 'select Status from Userlib where Username=\'%s\';',
            'ALLUSERS': 'select Username from Userlib;',
            'ALLSTATUS': 'select Status from Userlib;',
-           'GETUSER': 'select Url1, Url2, Url3 from Userlib where Username = \'%s\';'}
+           'GETUSER': 'select Url1, Url2, Url3 from Userlib where Username = \'%s\';',
+           'GETLEVEL': 'select lvl from Userlib where Username = \'%s\';',
+           'UPDATELEVEL': 'update Userlib set lvl=\'%s\' where Username=\'%s\';',
+           'SETHOMEWORK': 'INSERT INTO Homework values ()'}
 
 categories = ['github', 'linkedin', 'website']
 
 category_pairs = {'github': 'Url1', 'linkedin': 'Url2', 'website': 'Url3'}
 
-help_txt = ['Commands: /start, /getuser @username, /adduser, /updateurl [type: github, linkedin, website], /setstatus, /getstatus @username, /samsayingyes']
+help_txt = ['Commands: /getuser @username, /adduser, /updateurl [type: github, linkedin, website],\n/setstatus, /getstatus @username, /samsayingyes, /gas, /getlevel, /gethwk']
 
 responses = ['You\'re welcome']

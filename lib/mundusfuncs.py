@@ -1,6 +1,7 @@
 from . import templates
 from . import utilities
 from . import pythongas
+from datetime import date
 from random import randint
 
 
@@ -9,7 +10,9 @@ def isUserValid(username, connection):
         userquery = utilities.execute_read_query(
             connection,
             f'select Username from Userlib where Username=\'{username}\'')
-        if (userquery != '' or userquery != []):
+
+        # ftfy
+        if (userquery != '' and userquery != []):
             return True
         else:
             return False
@@ -36,7 +39,7 @@ def getUserInfo(username, connection):
         except Exception as e:
             return [f'Error: {e}', 0]
     else:
-        return "Username is not Valid. Are you registered in the DB?"
+        return ["Username is not Valid. Are you registered in the DB?", 0]
 
     admin_list = utilities.getAdmins()
     special_list = utilities.returnSetting('server_wizards')
@@ -92,7 +95,7 @@ def addUsertoDb(username, connection):
         utilities.execute_query(connection,
                                 (templates.queries['NEWUSER'] % (str(userint),
                                                                  username)))
-        return [f'{username} was succesffully added to the database', 1]
+        return [f'{username} was successfully added to the database', 1]
     except Exception as e:
         return [f'An error occured: {e}', 0]
 
@@ -112,8 +115,7 @@ def addData(username, data, connection):
         else:
             return [f'This category \'{data[0]}\' is not valid.', 0]
     else:
-        print(valid)
-        return [f'Username {username} is not valid. Are you in the db?', 0]
+        return [f'Username {username} is not valid. Is the User in the DB?', 0]
 
 
 def updateUserStatus(username, data, connection):
@@ -173,8 +175,48 @@ def returnGas():
     except Exception as e:
         return [f'{e}', 0]
 
-# ===== Admin Commands ===== #
 
+def getHwk(connection):
+    try:
+        raw_data = utilities.execute_read_query(
+            connection, 'select hwkStr from Homework where id=(select max(id) from Homework);')
+
+        hwk = ''.join(raw_data[0])
+
+        return [hwk, 1]
+
+    except Exception as e:
+        return [f'Something happened: {e}', 0]
+
+
+def getLevel(username, connection):
+    valid = isUserValid(username, connection)
+
+    if(valid):
+        try:
+            raw_data = utilities.execute_read_query(
+                connection, f'select level from Userlib where Username=\'{username}\';')
+
+            # Catch NONE types, there should be a better way to do this!
+            if(raw_data[0][0] == None):
+                return [f'Your level hasn\'t been set yet, {username}', 1]
+
+            userlevel = " ".join(str(raw_data[0][0]))
+
+            # If it returns nothing, this should catch it.
+            if(userlevel != [] and userlevel != ''):
+                return [f'{username}\'s level: {userlevel}', 1]
+            else:
+                return [f'Your level hasn\'t been set yet, {username}', 0]
+
+        except Exception as e:
+            return [f'Something happened {e}', 0]
+
+    else:
+        return [f'Username {username} is not valid. Is the User in the db?', 0]
+
+
+# ===== Admin Commands ===== #
 
 def displayAll(username, connection):
 
@@ -211,6 +253,64 @@ def displayAll(username, connection):
             except Exception as e:
                 return [f'Something happened: {e}', 0]
         else:
-            return [f'{username}, you are not an admin', 0]
+            return [f'{username} is not an admin', 0]
     else:
-        return [f'Username {username} is not valid. Are you in the db?', 0]
+        return [f'Username {username} is not valid. Is the User in the db?', 0]
+
+
+def setHwk(username, data, connection):
+    valid = isUserValid(username, connection)
+
+    today = date.today()
+
+    usercontent = ' '.join(data)
+
+    if(valid):
+        owner = utilities.getOwner()[0]
+        if(username == owner):
+
+            if(utilities.execute_read_query(connection, f'select date from Homework where date=\'{today}\'') == []):
+                # If there is no matching date, create a new one
+                try:
+                    utilities.execute_query(
+                        connection, f'insert into Homework(hwkStr, date) values (\'{usercontent}\', \'{today}\');')
+
+                    return [f'Homework has successfully been added for {date}, {username}!', 1]
+                except Exception as e:
+                    return [f'Something happened: {e}', 0]
+                # Else, just change the entry
+            else:
+                try:
+                    utilities.execute_query(
+                        connection, f'update Homework set hwkStr=\'{usercontent}\' where date=\'{today}\';')
+                    return [f'Homework for {today} was successfully updated, {username}', 1]
+                except Exception as e:
+                    return [f'Something happened: {e}', 0]
+        else:
+            return [f'User {username} is not owner', 0]
+    else:
+        return [f'Username {username} is not valid. Is the User in the db?', 0]
+
+
+def setLevel(username, data, connection):
+    valid = isUserValid(username, connection)
+
+    # Use userargs as this is more straightforward
+    # Need to check first param!
+    # userargs = data
+    if(valid):
+        owner = utilities.getOwner()[0]
+        if(username == owner):
+            try:
+                utilities.execute_query(
+                    connection, f'update Userlib set level = {data[1]} where Username =\'{data[0]}\'')
+
+                return [f'Success! {data[0]}\'s level has been updated to {data[1]}, {username}', 1]
+
+            except Exception as e:
+                return [f'Something happened: {e}', 0]
+
+        else:
+            return [f'User {username} is not owner', 0]
+    else:
+        return [f'Username {username} is not valid. Is the User in the db?', 0]

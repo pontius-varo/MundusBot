@@ -16,7 +16,7 @@ def gas():
 
     else:
         # No need for sys exit, just a return statement will do
-        return 'Error: Your config.toml file is missing! Please ensure that the file is in the local directory.'
+        return f'Error: Your config.toml file is missing! Please ensure that the file is in the local directory.'
 
     f = open(file_name, "r")
     config_data = toml.load(f)

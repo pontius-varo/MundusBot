@@ -4,7 +4,7 @@ from lib import mundusfuncs
 # Always import custom just in case, even if file is empty
 from lib import custom
 from telegram.ext import CommandHandler, Updater, MessageHandler, Filters
-version = 1.6  # MELTY
+version = 2.0  # BLOOD
 
 # == Global Variables ==#
 
@@ -29,7 +29,8 @@ def getUser(update, context):
     else:
         username = context.args[0]
 
-    telegram_msg = mundusfuncs.getUserInfo(username, db_connection)[0]
+    telegram_msg = utilities.catchDebug(
+        mundusfuncs.getUserInfo(username, db_connection))
 
     context.bot.send_message(
         chat_id=update.effective_chat.id, text=(telegram_msg))
@@ -38,7 +39,8 @@ def getUser(update, context):
 def addUser(update, context):
     username = utilities.formatUserName(update)
 
-    telegram_msg = mundusfuncs.addUsertoDb(username, db_connection)
+    telegram_msg = utilities.catchDebug(
+        mundusfuncs.addUsertoDb(username, db_connection))
 
     context.bot.send_message(
         chat_id=update.effective_chat.id, text=(telegram_msg)
@@ -48,10 +50,11 @@ def addUser(update, context):
 def addInfo(update, context):
     username = utilities.formatUserName(update)
 
-    telegram_msg = mundusfuncs.addData(username, context.args, db_connection)
+    telegram_msg = utilities.catchDebug(
+        mundusfuncs.addData(username, context.args, db_connection))
 
     context.bot.send_message(
-        chat_id=update.effective_chat.id, text=(telegram_msg[0])
+        chat_id=update.effective_chat.id, text=(telegram_msg)
     )
 
 
@@ -59,11 +62,11 @@ def updateStatus(update, context):
 
     username = utilities.formatUserName(update)
 
-    telegram_msg = mundusfuncs.updateUserStatus(
-        username, context.args, db_connection)
+    telegram_msg = utilities.catchDebug(mundusfuncs.updateUserStatus(
+        username, context.args, db_connection))
 
     context.bot.send_message(
-        chat_id=update.effective_chat.id, text=(telegram_msg[0])
+        chat_id=update.effective_chat.id, text=(telegram_msg)
     )
 
 
@@ -74,30 +77,56 @@ def getStatus(update, context):
     else:
         username = context.args[0]
 
-    telegram_msg = mundusfuncs.getUserStatus(username, db_connection)
+    telegram_msg = utilities.catchDebug(
+        mundusfuncs.getUserStatus(username, db_connection))
 
     context.bot.send_message(
-            chat_id=update.effective_chat.id, text=(telegram_msg[0])
+            chat_id=update.effective_chat.id, text=(telegram_msg)
         )
 
 # Help
 
 
 def getHelp(update, context):
-    telegram_msg = mundusfuncs.fetchHelp()
+    telegram_msg = utilities.catchDebug(mundusfuncs.fetchHelp())
 
     context.bot.send_message(
-        chat_id=update.effective_chat.id, text=(telegram_msg[0])
+        chat_id=update.effective_chat.id, text=(telegram_msg)
     )
 
 # Get Gas
 
 
 def getGas(update, context):
-    gas_result = mundusfuncs.returnGas()
+    gas_result = utilities.catchDebug(mundusfuncs.returnGas())
 
     context.bot.send_message(
-        chat_id=update.effective_chat.id, text=(gas_result[0]))
+        chat_id=update.effective_chat.id, text=(gas_result))
+
+
+# Get Homework
+def getHomework(update, context):
+
+    telegram_msg = utilities.catchDebug(mundusfuncs.getHwk(db_connection))
+
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg)
+    )
+
+
+def getUserlvl(update, context):
+
+    if context.args == []:
+        username = utilities.formatUserName(update)
+    else:
+        username = context.args[0]
+
+    telegram_msg = utilities.catchDebug(
+        mundusfuncs.getLevel(username, db_connection))
+
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg)
+    )
 
 
 # Unknown Command
@@ -114,15 +143,39 @@ def displayAllUsers(update, context):
 
     username = utilities.formatUserName(update)
 
-    list_of_users = mundusfuncs.displayAll(username, db_connection)
+    list_of_users = utilities.catchDebug(
+        mundusfuncs.displayAll(username, db_connection))
 
     context.bot.send_message(
-        chat_id=update.effective_chat.id, text=(list_of_users[0])
+        chat_id=update.effective_chat.id, text=(list_of_users)
     )
 
+
+def setHomework(update, context):
+
+    username = utilities.formatUserName(update)
+
+    telegram_msg = utilities.catchDebug(
+        mundusfuncs.setHwk(username, context.args, db_connection))
+
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg)
+    )
+
+
+def setUserlvl(update, context):
+
+    username = utilities.formatUserName(update)
+
+    telegram_msg = utilities.catchDebug(
+        mundusfuncs.setLevel(username, context.args, db_connection))
+
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text=(telegram_msg)
+    )
+
+
 # ===== Handlers ===== #
-
-
 # Command Dictionary is always filled with default commands
 command_dict = {
     'getuser': getUser,
@@ -132,7 +185,11 @@ command_dict = {
     'getstatus': getStatus,
     'displayallusers': displayAllUsers,
     'help': getHelp,
-    'gas': getGas
+    'gas': getGas,
+    'sethwk': setHomework,
+    'gethwk': getHomework,
+    'getlevel': getUserlvl,
+    'setlevel': setUserlvl
 }
 # Pulls the custom functions written by the user in ./lib/custom.py
 if (utilities.returnSetting('custom_functions')):

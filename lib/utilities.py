@@ -66,6 +66,7 @@ def formatUserName(data):
     return f'@{user_raw}'
 
 
+# These functions read the settings.json file. Change at your own discretion
 def getAdmins():
     try:
         file = open('./settings.json')
@@ -83,7 +84,19 @@ def getAdmins():
         return admin_list
 
     except Exception as e:
-        return f'Something happened: {e}'
+        return [f'Something happened: {e}', 0]
+
+
+def getOwner():
+    try:
+        file = open('./settings.json')
+        settings = json.load(file)
+        file.close()
+
+        return [settings['server_owner'], 1]
+
+    except Exception as e:
+        return [f'Something happened: {e}', 0]
 
 
 def returnSetting(setting):
@@ -96,3 +109,10 @@ def returnSetting(setting):
 
     except Exception as e:
         return [f'Unable to return {setting}: {e}', 0]
+
+
+def catchDebug(msg):
+    if(msg[1]):
+        return msg[0]
+    else:
+        return 'Oops, something happened. Are you in the db? Ping the Admin for details.'

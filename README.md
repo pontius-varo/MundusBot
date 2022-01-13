@@ -1,18 +1,20 @@
 # MundusBot
 
-Latest Version: 2.0 "BLOOD"
+Latest Version: 2.1 "BLOOD"
 
 A telegram bot written in Python 3.9 for a private server, but can now be used anywhere (if your sql db aligns with Mundus' queries).
 
 Please test out functionality by running nirntests.py, as this will tell you whether or not your settings are configured correctly
 and if everything is in place.
 
-Requires the following libraries: sqlite3, python-telegram-bot
+Requires the following libraries: sqlite3, python-telegram-bot. Use PIP to install both locally.
 
-#Change Log#
-1.2 Added /displayallusers, /samsayingyes, /cells, and /thanks along with admin array and empty token variable.
-1.3 Fixed bug within /updatestatus and /displayallusers
-1.5 Fixed more bugs in /getuser
+# 2.1 Changelog
+* Added catchDebug function to handle errors and display a generic string to the user
+* Fixed a bug in the isValid function
+* Added new commands: /gethwk, /sethwk (owner only), /getlevel, /setlevel
+* Fixed msg bug that returned first character of the string
+* Moved config.toml to ./ instead of ./lib
 
 # 2.0 'BLOOD' Changelog
 * Cleaned up code (script.py < 160 lines)
@@ -30,3 +32,8 @@ Requires the following libraries: sqlite3, python-telegram-bot
 * Added error handling (Basic, Mundus will return errors to the user)
 * Removed greeting() and cells() for the time being
 * Changed Default Mundus Photo on Telegram
+
+# Previous Version Log
+* 1.2 Added /displayallusers, /samsayingyes, /cells, and /thanks along with admin array and empty token variable.
+* 1.3 Fixed bug within /updatestatus and /displayallusers
+* 1.5 Fixed more bugs in /getuser
