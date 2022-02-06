@@ -1,7 +1,7 @@
 # All of these "Tiers" can be changed at your discretion.
 # Just make sure to edit the /getuser function and replace your key strings with my defaults
 user_res = {'FORIEGNER': '%s\nStanding with Mundus: Foreigner\nJust Eat Lift Program, bro',
-            'PLEB': '%s\nStanding with Mundus: Pleb\nGithub: %s\Get Gud',
+            'PLEB': '%s\nStanding with Mundus: Pleb\nGithub: %s\nGet Gud',
             'EQUESTRIAN': '%s\nStanding with Mundus: Equestrian\nGithub: %s\nLinkedIn: %s\nSeems like you\'re getting there, keep it up!',
             'PATRICIAN': '%s\nStanding with Mundus: Patrician\nGithub: %s\nLinkedIn: %s\nWebsite: %s\nA true Patrician.',
             'SPECIAL': '%s\nStanding with Mundus: Princeps\nGithub: %s\nLinkedIn: %s\nWebsite: %s\nMy lord, I am not worthy to be in your presence!',
