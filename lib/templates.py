@@ -10,7 +10,7 @@ user_res = {'FORIEGNER': '%s\nStanding with Mundus: Foreigner\nJust Eat Lift Pro
             'STATUS': '%s\'s current status: %s'
             }
 
-queries = {"NEWUSER": "INSERT INTO Userlib VALUES (%s, \'%s\', 'None', 'None', 'None', 'No Status');",
+queries = {"NEWUSER": "INSERT INTO Userlib VALUES (%s, \'%s\', 'None', 'None', 'None', 'No Status', 1);",
            'DOESUSEREXIST': 'select Username from Userlib where Username = \'%s\';',
            'ADDURL': 'update Userlib set %s = \'%s\' where Username =\'%s\';',
            'ADDSTATUS': 'update Userlib set Status=\'%s\' where Username=\'%s\';',
